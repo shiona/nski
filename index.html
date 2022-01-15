@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<title>nski</title>
+		<meta charset="UTF-8">
 		<link rel="stylesheet"
 			  href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 			  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
@@ -16,15 +17,32 @@
 				integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
 				crossorigin="anonymous"
 				referrerpolicy="no-referrer"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.min.js"
-				integrity="sha512-8BqQ2RH4L4sQhV41ZB24fUc1nGcjmrTA6DILV/aTPYuUzo+wBdYdp0fvQ76Sxgf36p787CXF7TktWlcxu/zyOg=="
-				crossorigin="anonymous"
-				referrerpolicy="no-referrer"></script>
-		<link rel="stylesheet"
-			  href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"
-			  integrity="sha512-cUoWMYmv4H9TGP4hbm1mIjYo90WzIQFo/5jj+P5tQcDTf+iVR59RyIj/a9fRsBxzxt5Dnv/Ex7MzRIxcDwaOLw=="
-			  crossorigin="anonymous"
-			  referrerpolicy="no-referrer" />
+	<style>
+img.green {
+	filter: hue-rotate(-65deg) contrast(2);
+}
+img.green-2 {
+	filter: hue-rotate(-60deg) contrast(2) brightness(0.9);
+}
+img.green-3 {
+	filter: hue-rotate(-55deg) contrast(2) brightness(0.8);
+}
+img.green-4 {
+	filter: hue-rotate(-50deg) contrast(2) brightness(0.6);
+}
+img.yellow {
+	filter: hue-rotate(-155deg) brightness(1.5) contrast(1.5);
+}
+img.orange {
+	filter: hue-rotate(-170deg) brightness(1.2) saturate(1.0);
+}
+img.red {
+	filter: hue-rotate(145deg) saturate(0.8) brightness(0.8) contrast(1.4);
+}
+img.black {
+	filter: saturate(0) contrast(2) brightness(0.7);
+}
+	</style>
 	</head>
 
 	<body>
@@ -32,13 +50,16 @@
 	</body>
 
 	<script>
+		var decoder = new TextDecoder("iso-8859-1")
 		var nameRegExp = new RegExp('var name = \'([^\']*)\';')
 		var statusRegExp = new RegExp('var status = \'([^\']*)\';')
 		var dateRegExp = new RegExp('tilaPaiva: \'([^\']*)\'')
 		//var corsProxy = "http://alloworigin.com/get?url=" // no http?
 		//var corsProxy = "http://api.allorigins.win/get?url=" // Fucks up encoding?
 		//var corsProxy = "http://api.allorigins.win/get?charset=ISO-8859-1&url=" // \o/
-		var corsProxy = "https://api.allorigins.win/get?charset=ISO-8859-1&url=" // \o/
+		//var corsProxy = "https://api.allorigins.win/get?charset=ISO-8859-1&url=" // \o/
+		//var corsProxy = location.protocol + "//api.allorigins.win/get?charset=ISO-8859-1&url=" // \o/
+		var corsProxy = location.protocol + "//api.allorigins.win/raw?url=" // \o/
 		//var corsProxyPost = "http://api.allorigins.win/get?requestMethod=POST&charset=ISO-8859-1&url=" // \o/
 		//var corsProxy = "http://cors-proxy.htmldriven.com/?url=" // no http?
 		//var corsProxy = "http://www.whateverorigin.org/get?url=" // 404
@@ -60,12 +81,10 @@
 				 * the code the least bit clean
 				 */
 
-		// Really could use some more colors, but what can you do.
-		// At least I know I'm not going to make new icons
 		var icons = {}
-		for (color of ['red', 'green', 'orange'])
+		for (color of ['red', 'green', 'green-2', 'green-3', 'green-4', 'orange', 'yellow', 'black'])
 		{
-					icons[color] = new L.AwesomeMarkers.Icon({ markerColor: color });
+					icons[color] = new L.Icon.Default({ className: color });
 				}
 
 		var momentFormat = "DD.MM.YYYY HH:mm:ss"
@@ -76,14 +95,17 @@
 		{
 					var statusResp = await fetch(corsProxy + statusUrl)
 					var locationResp = await fetch(locationUrl)
-					var statusHtml = await statusResp.text()
+					var statusHtml = await statusResp.arrayBuffer()
 					var locationXml = await locationResp.text()
+
+					statusHtml = decoder.decode(statusHtml)
 
 					var statuses = scrapeStatusData(statusHtml)
 					var locations = scrapeLocationData(locationXml)
 
 					for ({name, status, date} of statuses)
 					{
+								var state = ""+status
 								var statusUpdated = date
 								var pos = locations[name]
 								if (pos)
@@ -91,20 +113,34 @@
 											var color = "red"
 											var extraClass = null;
 											var yesterday = moment().subtract(1, 'days')
+											var threeDaysAgo = moment().subtract(3, 'days')
+											var weekAgo = moment().subtract(1, 'weeks')
 											if (status == "Luistelukunnossa")
 											{
 														if (statusUpdated >= yesterday)
 														{
 																	color = "green"
 																}
+														else if (statusUpdated >= threeDaysAgo)
+														{
+																	color = "green-2"
+																}
+														else if (statusUpdated >= weekAgo)
+														{
+																	color = "green-3"
+																}
 														else
 														{
-																	color = "orange"
+																	color = "green-4"
 																}
 
 													}
+											else if (status == "Ei käytössä")
+											{
+														color = "black"
+													}
 
-											var marker = L.marker(pos, {icon: icons[color], extraClasses: "perse"}).bindPopup(name + "<br>" + status + "<br>" + statusUpdated.format(momentFormat) ).addTo(map);
+											var marker = L.marker(pos, {icon: icons[color]}).bindPopup(name + "<br>" + status + "<br>" + statusUpdated.format(momentFormat) ).addTo(map);
 										}
 							}
 				}
