@@ -3,21 +3,21 @@
 		<title>nski</title>
 		<meta charset="UTF-8">
 		<link rel="stylesheet"
-			  href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-			  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-			  crossorigin=""/>
+		      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+		      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+		      crossorigin=""/>
 		<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-				integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-				crossorigin=""></script>
+			integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+			crossorigin=""></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.5/proj4.js"
-				integrity="sha512-MMmVaQGDVI3Wouc5zT5G7k/snN9gPqquIhZsHgIIHVDlRgYTYGxrwu6w482iIhAq8n5R6+pcBgpGgxFFBz7rZA=="
-				crossorigin="anonymous"
-				referrerpolicy="no-referrer"></script>
+			integrity="sha512-MMmVaQGDVI3Wouc5zT5G7k/snN9gPqquIhZsHgIIHVDlRgYTYGxrwu6w482iIhAq8n5R6+pcBgpGgxFFBz7rZA=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
-				integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
-				crossorigin="anonymous"
-				referrerpolicy="no-referrer"></script>
-	<style>
+			integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer"></script>
+		<style>
 img.green {
 	filter: hue-rotate(-65deg) contrast(2);
 }
@@ -42,7 +42,7 @@ img.red {
 img.black {
 	filter: saturate(0) contrast(2) brightness(0.7);
 }
-	</style>
+		</style>
 	</head>
 
 	<body>
@@ -73,19 +73,14 @@ img.black {
 		var tampereCoords = [61.48, 23.8]
 		var map = L.map('map').setView(tampereCoords, 12);
 		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-					attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-				}).addTo(map);
-
-		/* Btw neovim is being an ass about all these indentations.
-				 * This is a quick hack project, I'm not going to bother making
-				 * the code the least bit clean
-				 */
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+		}).addTo(map);
 
 		var icons = {}
 		for (color of ['red', 'green', 'green-2', 'green-3', 'green-4', 'orange', 'yellow', 'black'])
 		{
-					icons[color] = new L.Icon.Default({ className: color });
-				}
+			icons[color] = new L.Icon.Default({ className: color });
+		}
 
 		var momentFormat = "DD.MM.YYYY HH:mm:ss"
 
@@ -93,101 +88,101 @@ img.black {
 
 		var getData = async function()
 		{
-					var statusResp = await fetch(corsProxy + statusUrl)
-					var locationResp = await fetch(locationUrl)
-					var statusHtml = await statusResp.arrayBuffer()
-					var locationXml = await locationResp.text()
+			var statusResp = await fetch(corsProxy + statusUrl)
+			var locationResp = await fetch(locationUrl)
+			var statusHtml = await statusResp.arrayBuffer()
+			var locationXml = await locationResp.text()
 
-					statusHtml = decoder.decode(statusHtml)
+			statusHtml = decoder.decode(statusHtml)
 
-					var statuses = scrapeStatusData(statusHtml)
-					var locations = scrapeLocationData(locationXml)
+			var statuses = scrapeStatusData(statusHtml)
+			var locations = scrapeLocationData(locationXml)
 
-					for ({name, status, date} of statuses)
+			for ({name, status, date} of statuses)
+			{
+				var state = ""+status
+				var statusUpdated = date
+				var pos = locations[name]
+				if (pos)
+				{
+					var color = "red"
+					var extraClass = null;
+					var yesterday = moment().subtract(1, 'days')
+					var threeDaysAgo = moment().subtract(3, 'days')
+					var weekAgo = moment().subtract(1, 'weeks')
+					if (status == "Luistelukunnossa")
 					{
-								var state = ""+status
-								var statusUpdated = date
-								var pos = locations[name]
-								if (pos)
-								{
-											var color = "red"
-											var extraClass = null;
-											var yesterday = moment().subtract(1, 'days')
-											var threeDaysAgo = moment().subtract(3, 'days')
-											var weekAgo = moment().subtract(1, 'weeks')
-											if (status == "Luistelukunnossa")
-											{
-														if (statusUpdated >= yesterday)
-														{
-																	color = "green"
-																}
-														else if (statusUpdated >= threeDaysAgo)
-														{
-																	color = "green-2"
-																}
-														else if (statusUpdated >= weekAgo)
-														{
-																	color = "green-3"
-																}
-														else
-														{
-																	color = "green-4"
-																}
+						if (statusUpdated >= yesterday)
+						{
+							color = "green"
+						}
+						else if (statusUpdated >= threeDaysAgo)
+						{
+							color = "green-2"
+						}
+						else if (statusUpdated >= weekAgo)
+						{
+							color = "green-3"
+						}
+						else
+						{
+							color = "green-4"
+						}
 
-													}
-											else if (status == "Ei käytössä")
-											{
-														color = "black"
-													}
+					}
+					else if (status == "Ei käytössä")
+					{
+						color = "black"
+					}
 
-											var marker = L.marker(pos, {icon: icons[color]}).bindPopup(name + "<br>" + status + "<br>" + statusUpdated.format(momentFormat) ).addTo(map);
-										}
-							}
+					var marker = L.marker(pos, {icon: icons[color]}).bindPopup(name + "<br>" + status + "<br>" + statusUpdated.format(momentFormat) ).addTo(map);
 				}
+			}
+		}
 
 		var scrapeStatusData = function(htmlSource)
 		{
-					var statuses = []
-					var dom = new DOMParser().parseFromString(htmlSource, "text/html");
-					var scripts = dom.getElementsByTagName('script');
-					for (script of scripts) {
-								var script = script.text;
-								var name = script.match(nameRegExp);
-								var status = script.match(statusRegExp);
-								var date = script.match(dateRegExp);
-								if (name && status && date)
-								{
+			var statuses = []
+			var dom = new DOMParser().parseFromString(htmlSource, "text/html");
+			var scripts = dom.getElementsByTagName('script');
+			for (script of scripts) {
+				var script = script.text;
+				var name = script.match(nameRegExp);
+				var status = script.match(statusRegExp);
+				var date = script.match(dateRegExp);
+				if (name && status && date)
+				{
 
-											name = name[1]
-											status = status[1]
-											date = date[1]
-											date = moment(date, "DD.MM.YYYY HH:mm:ss")
-											statuses.push({
-														"name": name,
-														"status": status,
-														"date": date});
+					name = name[1]
+					status = status[1]
+					date = date[1]
+					date = moment(date, "DD.MM.YYYY HH:mm:ss")
+					statuses.push({
+						"name": name,
+						"status": status,
+						"date": date});
 
-										}
-							}
-
-					return statuses
 				}
+			}
+
+			return statuses
+		}
 
 		var scrapeLocationData = function(xmlSource)
 		{
-					var locations = {}
-					var dom = new DOMParser().parseFromString(xmlSource, "application/xml");
-					var rinks = dom.getElementsByTagName('mski:tampere_luistelukentat')
-					for (rink of rinks)
-					{
-								var name = rink.getElementsByTagName('mski:NIMI')[0].textContent;
-								var pos = rink.getElementsByTagName('gml:pos')[0].textContent;
-								pos = pos.split(' ').map( s => parseFloat(s))
-								pos = proj4('EPSG:3067', 'WGS84', pos).reverse()
-								locations[name] = pos
-							}
-					return locations
-				}
+			var locations = {}
+			var dom = new DOMParser().parseFromString(xmlSource, "application/xml");
+			var rinks = dom.getElementsByTagName('mski:tampere_luistelukentat')
+			for (rink of rinks)
+			{
+				var name = rink.getElementsByTagName('mski:NIMI')[0].textContent;
+				var pos = rink.getElementsByTagName('gml:pos')[0].textContent;
+				pos = pos.split(' ').map( s => parseFloat(s))
+				pos = proj4('EPSG:3067', 'WGS84', pos).reverse()
+				locations[name] = pos
+			}
+			return locations
+		}
 
 		getData();
 	</script>
