@@ -1,7 +1,9 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<title>nski</title>
 		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<link rel="stylesheet"
 		      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
 		      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
@@ -38,11 +40,19 @@ img.red {
 img.black {
 	filter: saturate(0) contrast(2) brightness(0.7);
 }
+body {
+    padding: 0;
+    margin: 0;
+}
+html, body, #map {
+    height: 100%;
+    width: 100vw;
+}
 		</style>
 	</head>
 
 	<body>
-		<div id="map" style="height:100%"></div>
+		<div id="map"></div>
 	</body>
 
 	<script>
