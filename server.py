@@ -20,7 +20,9 @@ def proxy_data():
                 "area": "0",
                 "qqq": "1",
                 "language": "1",
-                "maintenance_on": "0"
+                "maintenance_on": "0",
+                "latX": "0",
+                "lonY": "0"
             }
             )
 
